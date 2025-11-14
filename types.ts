@@ -8,7 +8,7 @@ export interface TripDetails {
 }
 
 export interface SavedTrip {
-  id: string;
+  id: number;
   origin: string;
   destination: string;
   stops: string[];

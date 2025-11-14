@@ -5,12 +5,31 @@ import { TrashIcon, LoadIcon, RoundTripIcon } from './Icons';
 interface SavedTripsListProps {
   trips: SavedTrip[];
   onLoad: (trip: SavedTrip) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
+  isLoading: boolean;
 }
 
-const SavedTripsList: React.FC<SavedTripsListProps> = ({ trips, onLoad, onDelete }) => {
+const SavedTripsList: React.FC<SavedTripsListProps> = ({ trips, onLoad, onDelete, isLoading }) => {
+  if (isLoading) {
+    return (
+        <div className="w-full max-w-2xl mt-12">
+            <h2 className="text-2xl font-bold text-slate-100 mb-4 text-center sm:text-left">Viagens Salvas</h2>
+            <div className="bg-slate-800/70 rounded-lg p-8 text-center text-slate-400">
+                Carregando viagens salvas...
+            </div>
+        </div>
+    );
+  }
+
   if (trips.length === 0) {
-    return null;
+    return (
+      <div className="w-full max-w-2xl mt-12">
+        <h2 className="text-2xl font-bold text-slate-100 mb-4 text-center sm:text-left">Viagens Salvas</h2>
+        <div className="bg-slate-800/70 rounded-lg p-8 text-center text-slate-500">
+          Nenhuma viagem salva ainda.
+        </div>
+      </div>
+    );
   }
 
   return (

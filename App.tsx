@@ -1,11 +1,27 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { TripDetails, SavedTrip } from './types';
 import { getTripDetails } from './services/geminiService';
+import { supabase } from './services/supabaseClient';
 import TripInputForm from './components/TripInputForm';
 import TripResult from './components/TripResult';
 import SavedTripsList from './components/SavedTripsList';
 import LoginScreen from './components/LoginScreen';
 import { CarIcon, LogoIcon } from './components/Icons';
+
+// Helper para mapear dados do Supabase (snake_case) para o estado da aplicação (camelCase)
+const mapSupabaseTripToSavedTrip = (supabaseTrip: any): SavedTrip => {
+    return {
+        id: supabaseTrip.id,
+        origin: supabaseTrip.origin,
+        destination: supabaseTrip.destination,
+        stops: supabaseTrip.stops,
+        fuelEfficiency: supabaseTrip.fuel_efficiency,
+        fuelPrice: supabaseTrip.fuel_price,
+        details: supabaseTrip.details,
+        timestamp: supabaseTrip.timestamp,
+        isRoundTrip: supabaseTrip.is_round_trip,
+    };
+};
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -20,22 +36,29 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
+  const [isFetchingTrips, setIsFetchingTrips] = useState<boolean>(true);
 
   useEffect(() => {
-    try {
-      const storedTrips = localStorage.getItem('savedTrips');
-      if (storedTrips) {
-        setSavedTrips(JSON.parse(storedTrips));
+    const fetchTrips = async () => {
+      setIsFetchingTrips(true);
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching trips:', error);
+        setError(`Não foi possível carregar as viagens salvas: ${error.message}`);
+      } else if (data) {
+        setSavedTrips(data.map(mapSupabaseTripToSavedTrip));
       }
-    } catch (e) {
-      console.error("Failed to parse saved trips from localStorage", e);
-      localStorage.removeItem('savedTrips');
-    }
-  }, []);
+      setIsFetchingTrips(false);
+    };
 
-  useEffect(() => {
-    localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
-  }, [savedTrips]);
+    if (isAuthenticated) {
+      fetchTrips();
+    }
+  }, [isAuthenticated]);
   
   const handleLogin = (password: string): boolean => {
     if (password === '124412') {
@@ -71,25 +94,52 @@ const App: React.FC = () => {
     }
   }, [origin, destination, stops, fuelEfficiency, fuelPrice, isRoundTrip]);
 
-  const handleSaveTrip = useCallback(() => {
+  const handleSaveTrip = useCallback(async () => {
     if (!tripDetails) return;
-    const newTrip: SavedTrip = {
-        id: Date.now().toString(),
+    
+    // Mapeia do estado (camelCase) para as colunas do Supabase (snake_case)
+    const newTripData = {
         origin,
         destination,
         stops,
-        fuelEfficiency,
-        fuelPrice,
+        fuel_efficiency: fuelEfficiency,
+        fuel_price: fuelPrice,
         details: tripDetails,
         timestamp: Date.now(),
-        isRoundTrip,
+        is_round_trip: isRoundTrip,
     };
-    setSavedTrips(prevTrips => [newTrip, ...prevTrips]);
+
+    const { data, error } = await supabase
+        .from('trips')
+        .insert([newTripData])
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error saving trip:', error);
+        setError(`Falha ao salvar a viagem: ${error.message}`);
+    } else if (data) {
+        // Mapeia de volta para camelCase para atualizar o estado da UI
+        setSavedTrips(prevTrips => [mapSupabaseTripToSavedTrip(data), ...prevTrips]);
+    }
   }, [tripDetails, origin, destination, stops, fuelEfficiency, fuelPrice, isRoundTrip]);
 
-  const handleDeleteTrip = useCallback((id: string) => {
+  const handleDeleteTrip = useCallback(async (id: number) => {
+      const originalTrips = [...savedTrips];
+      // Atualização otimista da UI
       setSavedTrips(prevTrips => prevTrips.filter(trip => trip.id !== id));
-  }, []);
+
+      const { error } = await supabase
+          .from('trips')
+          .delete()
+          .match({ id: id });
+
+      if (error) {
+          console.error('Error deleting trip:', error);
+          setError(`Falha ao excluir a viagem: ${error.message}`);
+          setSavedTrips(originalTrips); // Reverte em caso de erro
+      }
+  }, [savedTrips]);
 
   const handleLoadTrip = useCallback((trip: SavedTrip) => {
       setOrigin(trip.origin);
@@ -161,7 +211,12 @@ const App: React.FC = () => {
           )}
         </div>
 
-        <SavedTripsList trips={savedTrips} onLoad={handleLoadTrip} onDelete={handleDeleteTrip} />
+        <SavedTripsList 
+          trips={savedTrips} 
+          onLoad={handleLoadTrip} 
+          onDelete={handleDeleteTrip} 
+          isLoading={isFetchingTrips} 
+        />
 
       </main>
       
