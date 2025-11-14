@@ -1,0 +1,5 @@
+{
+  "name": "Calculadora de Custo de Combustível para Viagem",
+  "description": "Um aplicativo para calcular detalhes da viagem, incluindo duração, distância, consumo de combustível e custo, com base na eficiência do seu carro e nos preços locais da gasolina, desenvolvido com Gemini.",
+  "requestFramePermissions": []
+}
