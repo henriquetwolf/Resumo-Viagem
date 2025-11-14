@@ -1,11 +1,16 @@
 import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 import { TripDetails } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+// Esta lógica lida com os ambientes da Vercel (import.meta.env) e local/AI Studio (process.env).
+// Prioriza a variável do Vite para o deploy, mas recorre ao process.env para garantir a compatibilidade local.
+const apiKey = (import.meta as any).env?.VITE_API_KEY ?? (typeof process !== 'undefined' ? (process.env as any)?.API_KEY : undefined);
+
+
+if (!apiKey) {
+    throw new Error("Chave da API do Gemini não encontrada. Configure VITE_API_KEY no seu deploy da Vercel ou garanta que a API_KEY esteja disponível no seu ambiente atual.");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey });
 
 const presentTripDetailsFunctionDeclaration: FunctionDeclaration = {
     name: 'apresentar_detalhes_viagem',
