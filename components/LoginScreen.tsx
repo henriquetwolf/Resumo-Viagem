@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { LogoIcon } from './Icons';
 
 interface LoginScreenProps {
   onLogin: (password: string) => boolean;
@@ -24,10 +23,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       <div className="w-full max-w-sm">
         <header className="text-center mb-8">
           <p className="text-lg font-medium text-slate-300 mb-2">VOLL Pilates Group</p>
-          <div className="flex items-center justify-center gap-4 mb-2">
-            <LogoIcon className="w-10 h-10 text-cyan-400" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 tracking-tight">Calculadora de Combustível</h1>
-          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 tracking-tight mb-2">Calculadora de Combustível</h1>
           <p className="text-slate-400">Por favor, insira a senha para continuar.</p>
         </header>
 

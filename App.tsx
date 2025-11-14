@@ -6,7 +6,7 @@ import TripInputForm from './components/TripInputForm';
 import TripResult from './components/TripResult';
 import SavedTripsList from './components/SavedTripsList';
 import LoginScreen from './components/LoginScreen';
-import { CarIcon, LogoIcon } from './components/Icons';
+import { CarIcon } from './components/Icons';
 
 // Helper para mapear dados do Supabase (snake_case) para o estado da aplicação (camelCase)
 const mapSupabaseTripToSavedTrip = (supabaseTrip: any): SavedTrip => {
@@ -161,10 +161,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col items-center p-4 sm:p-6">
       <header className="w-full max-w-2xl text-center mb-8">
         <p className="text-lg font-medium text-slate-300 mb-2">VOLL Pilates Group</p>
-        <div className="flex items-center justify-center gap-4 mb-2">
-            <LogoIcon className="w-10 h-10 text-cyan-400" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 tracking-tight">Calculadora de Combustível</h1>
-        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold text-slate-100 tracking-tight mb-2">Calculadora de Combustível</h1>
         <p className="text-slate-400">Estime o custo e os recursos da sua jornada com precisão de IA.</p>
       </header>
 
