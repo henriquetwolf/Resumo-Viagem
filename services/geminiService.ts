@@ -74,7 +74,8 @@ export const getTripDetails = async (
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                systemInstruction: "Você é um assistente de cálculo de viagens. Seu único propósito é usar as ferramentas fornecidas para calcular e apresentar os detalhes da viagem. Você deve chamar a função `apresentar_detalalhes_viagem` e não fornecer uma resposta em texto livre.",
+                // FIX: Corrected typo in function name inside system instruction.
+                systemInstruction: "Você é um assistente de cálculo de viagens. Seu único propósito é usar as ferramentas fornecidas para calcular e apresentar os detalhes da viagem. Você deve chamar a função `apresentar_detalhes_viagem` e não fornecer uma resposta em texto livre.",
                 tools: [{ functionDeclarations: [presentTripDetailsFunctionDeclaration] }],
             },
         });
